@@ -5,14 +5,17 @@ using UnityEngine;
 public class Movements :
     MonoBehaviour {
 
-    [Range(0f, 100f)] public float mMovementSpeed;
-    [Range(0f, 100f)] public float mJumpPower;
-    [SerializeField] private Transform mCeilingChecker;
-    [SerializeField] private Transform mFloorChecker;
+    [Range(0f, 100f)]   public  float       mMovementSpeed;
+    [Range(0f, 1000f)]  public  float       mJumpPower;
+    [SerializeField]    private Transform   mCeilingChecker;
+    [SerializeField]    private Transform   mFloorChecker;
 
     private Rigidbody2D mObjectRB;
     private bool        mOnGround   = true;
     private bool        mCrouching  = false;
+
+    private bool        mJump       = false;
+    private bool        mCrouch     = false;
 
 
 public
@@ -25,26 +28,39 @@ public
 
 public
     void
-    FixedUpdate ()
+    Update()
     {
-        if( Input.GetAxisRaw("Horizontal") > 0 )
-            Move( new Vector2( 1f, 0f ) );
-        else if( Input.GetAxisRaw("Horizontal") < 0 )
-            Move( new Vector2( -1f, 0f ) );
-        else
-            Move( new Vector2( 0f, 0f ) );
-
-        if (Input.GetButtonDown("Jump"))
-            Jump();
+        if( Input.GetButtonDown( "Jump" ) )
+            mJump = true;
 
     }
+
 
 public
     void
-    Move( Vector2 iDirection )
+    FixedUpdate ()
     {
-        mObjectRB.velocity = iDirection * mMovementSpeed * Time.deltaTime;
+        mOnGround = FloorCheck();
+
+
+        Move( Input.GetAxisRaw( "Horizontal" ) );
+
+        if( mJump)
+        {
+            Jump();
+            mJump = false;
+        }
+
     }
+
+
+public
+    void
+    Move( float iHorizontalAxis )
+    {
+        mObjectRB.velocity = new Vector2( iHorizontalAxis * mMovementSpeed * Time.fixedDeltaTime * 10f, mObjectRB.velocity.y );
+    }
+
 
 public
     void
@@ -53,7 +69,37 @@ public
         if (!mOnGround)
             return;
 
-        mObjectRB.AddForce( new Vector2( 0f, mJumpPower * Time.deltaTime) );
+        mObjectRB.AddForce( new Vector2( 0f, mJumpPower ) );
+    }
+
+
+private
+    bool
+    FloorCheck()
+    {
+        Collider2D[] results = Physics2D.OverlapBoxAll(mFloorChecker.position, new Vector2(1f, 1f), 0f);
+        for (int i = 0; i < results.Length; ++i)
+        {
+            if (results[i].gameObject != gameObject)
+                return  true;
+        }
+
+        return  false;
+    }
+
+
+private
+    bool
+    CeilCheck()
+    {
+        Collider2D[] results = Physics2D.OverlapBoxAll(mCeilingChecker.position, new Vector2(1f, 1f), 0f);
+        for (int i = 0; i < results.Length; ++i)
+        {
+            if (results[i].gameObject != gameObject)
+                return  true;
+        }
+
+        return  false;
     }
 
 }

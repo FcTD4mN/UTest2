@@ -4,7 +4,8 @@ using UnityEngine;
 
 public class CameraFollow : MonoBehaviour {
 
-    public GameObject mFollowMe;
+    public GameObject   mFollowMe;
+    public float        mZCamDistance;
 
     private Vector3 mOffset;
 
@@ -12,14 +13,13 @@ public
     void
     Start ()
     {
-        mOffset = transform.position - mFollowMe.transform.position;
     }
 
 public
     void
     LateUpdate ()
     {
-        transform.position = mFollowMe.transform.position + mOffset;
-        //mOffset = transform.position - mFollowMe.transform.position;
+        Vector3 followMePos = mFollowMe.transform.position;
+        transform.position = new Vector3( followMePos.x, followMePos.y, mZCamDistance );
     }
 }
